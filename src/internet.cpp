@@ -59,3 +59,40 @@ void config_clock(void) {
 		time(&now);
 	}
 }
+
+int register_with_server(void) {
+    HTTPClient http;
+	WiFiClient wifi;
+
+    http.begin(wifi, SERVER "/register");
+    http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+    int code = http.POST("id=" DEV_ID "&group=" GROUP "&color=" COLOR);
+
+    String response = http.getString();
+    http.end();
+
+    if (code == 200 && response.compareTo("OK") == 0)
+        return 0;
+
+    return 1;
+}
+
+int report_button_push(int64_t epoch) {
+	char data[100];
+	sprintf(data, "id=" DEV_ID "&epoch=%lld", epoch);
+
+    HTTPClient http;
+	WiFiClient wifi;
+
+    http.begin(wifi, SERVER "/push");
+    http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+    int code = http.POST(data);
+
+    String response = http.getString();
+    http.end();
+
+    if (code == 200 && response.compareTo("OK") == 0)
+        return 0;
+
+    return 1;
+}

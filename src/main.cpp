@@ -26,7 +26,11 @@ void setup() {
 
 	config_clock();
 
-	// TODO register with server
+	if (register_with_server() == 0)
+		Serial.println("Successfully registered with server.");
+	else
+		Serial.println("Failed to register with server.");
+
 }
 
 void loop() {
@@ -35,7 +39,8 @@ void loop() {
 	if (btn_pressed) {
 		push_epoch = get_epoch_ms();
 		Serial.println(push_epoch);
-		// TODO report to server
+		report_button_push(push_epoch);
+
 		btn_pressed = 0;
 	}
 
@@ -50,7 +55,7 @@ void IRAM_ATTR button_pressed(void) {
 	btn_pressed = 1;
 }
 
-int64_t get_epoch_ms() {
+int64_t get_epoch_ms()  {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
 	return tv.tv_sec * 1000LL + (tv.tv_usec / 1000LL);
