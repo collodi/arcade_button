@@ -5,15 +5,11 @@ int connect_to_internet(int status_pin) {
 		delay(2000);
 
 		int conn = connect_to_wifi(status_pin);
-		if (conn == 0) { // connected
-            Serial.println("connected to internet");
+		if (conn == 0) // connected
 			return 0;
-        }
 
-		if (conn == 2) { // error, don't retry
-            Serial.println("failed to connect to internet");
+		if (conn == 2) // error, don't retr
 			return 1;
-        }
 	}
 }
 
@@ -61,12 +57,16 @@ void config_clock(void) {
 }
 
 int register_with_server(void) {
+	char data[100];
+	String ip = WiFi.localIP().toString();
+	sprintf(data, "id=" DEV_ID "&group=" GROUP "&color=" COLOR "&ip=%s", ip.c_str());
+
     HTTPClient http;
 	WiFiClient wifi;
 
     http.begin(wifi, SERVER "/register");
     http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-    int code = http.POST("id=" DEV_ID "&group=" GROUP "&color=" COLOR);
+    int code = http.POST(data);
 
     String response = http.getString();
     http.end();

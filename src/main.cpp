@@ -12,6 +12,8 @@ int64_t get_epoch_ms(void);
 bool btn_pressed = 0;
 time_t push_epoch = 0;
 
+WiFiServer server(80);
+
 void setup() {
 	Serial.begin(115200);
 	Serial.setTimeout(200);
@@ -22,7 +24,12 @@ void setup() {
 	attachInterrupt(digitalPinToInterrupt(BTN_PIN), button_pressed, FALLING);
 
 	WiFi.mode(WIFI_STA);
-	connect_to_internet(2);
+	if (connect_to_internet(2) == 0) {
+		Serial.println("connected to internet");
+		Serial.println(WiFi.localIP().toString());
+	} else {
+		Serial.println("failed to connect to internet");
+	}
 
 	config_clock();
 
@@ -31,11 +38,11 @@ void setup() {
 	else
 		Serial.println("Failed to register with server.");
 
+	server.begin();
+	Serial.println("Started the ESP-01 server.");
 }
 
 void loop() {
-	delay(200);
-
 	if (btn_pressed) {
 		push_epoch = get_epoch_ms();
 		Serial.println(push_epoch);
@@ -44,11 +51,32 @@ void loop() {
 		btn_pressed = 0;
 	}
 
-	// TODO listen to server
+	WiFiClient client = server.accept();
+	if (!client)
+		return;
+
+	while(!client.available())
+		delay(5);
+
+	String request = client.readStringUntil('\r');
+	Serial.println(request);
+	client.flush();
+
+	if (request.indexOf("/led=on") != -1)
+		set_led(true);
+	else if (request.indexOf("/led=off") != -1)
+		set_led(false);
+
+    client.println("HTTP/1.1 200 OK");
+    client.println("Content-Length: 0");
+    client.println("Connection: close");
+    client.println();
+
+	client.stop();
 }
 
 void set_led(bool on) {
-	digitalWrite(LED_PIN, on);
+	digitalWrite(LED_PIN, !on);
 }
 
 void IRAM_ATTR button_pressed(void) {
