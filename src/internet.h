@@ -4,6 +4,7 @@
 #include "credentials.h"
 #include "device_info.h"
 
+// TODO local DNS
 #define SERVER "http://192.168.0.13:5000"
 
 int connect_to_internet(int status_pin);

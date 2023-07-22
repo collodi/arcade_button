@@ -59,7 +59,7 @@ void config_clock(void) {
 int register_with_server(void) {
 	char data[100];
 	String ip = WiFi.localIP().toString();
-	sprintf(data, "id=" DEV_ID "&group=" GROUP "&color=" COLOR "&ip=%s", ip.c_str());
+	sprintf(data, "id=%06x&group=%s&color=%s&ip=%s", ESP.getChipId(), GROUP, COLOR, ip.c_str());
 
     HTTPClient http;
 	WiFiClient wifi;
@@ -79,7 +79,7 @@ int register_with_server(void) {
 
 int report_button_push(int64_t epoch) {
 	char data[100];
-	sprintf(data, "id=" DEV_ID "&epoch=%lld", epoch);
+	sprintf(data, "id=%06x&epoch=%lld", ESP.getChipId(), epoch);
 
     HTTPClient http;
 	WiFiClient wifi;
